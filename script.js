@@ -9,15 +9,7 @@ const Api = (() => {
     // }
 
     const getCards = () =>
-        //     //     fetchJsonp([baseUrl, path].join("/"))
-        //     //         .then((response) => response.json())
-        //     //         .then((json) => console.log(json));
-
         fetch([baseUrl, path].join("/")).then((response) => response.json());
-
-    // Promise.all(urlList.map((u) => fetch(u)))
-    //     .then((respons) => respons.json()
-    // );
 
     return {
         getCards,
@@ -30,10 +22,10 @@ const View = (() => {
         container: ".container",
         mainContainer: ".main-container",
         cardContainer: ".card-container",
-        cardInfo: ".card-info",
-        cardContent: "card-content",
-        cardbtn: "card-btn",
-        reloadbtn: "reload-btn",
+        cardinfo: ".card-info",
+        cardContent: ".card-content",
+        cardbtn: ".card-btn",
+        reloadbtn: ".reload-btn",
     };
 
     const render = (ele, tmp) => {
@@ -42,7 +34,7 @@ const View = (() => {
 
     const creatTmp = (arr) => {
         let tmp = "";
-        // console.log(arr[0].results[0]);
+        console.log(arr[0].results[0]);
         arr.forEach((person) => {
             tmp += `
             <div class="card-container">
@@ -105,11 +97,29 @@ const Controller = ((model, view) => {
     const state = new model.State();
 
     const showdob = () => {
-        const cardInfo = document.querySelector(view.domstr.cardInfo);
+        const cardinfo = document.querySelector(view.domstr.cardinfo);
 
-        cardInfo.addEventListener("click", (event) => {
+        cardinfo.addEventListener("click", (event) => {
+            console.log(event.target.className);
             if (event.target.className === "card-btn") {
-                console.log(1);
+                const btn = document.getElementsByClassName("card-btn");
+                btn.style.display = "none";
+                const dob = document.getElementsByClassName("card-dob");
+                btn.style.display = "block";
+            }
+        });
+    };
+
+    const hidedob = () => {
+        const cardinfo = document.querySelector(view.domstr.cardinfo);
+
+        cardinfo.addEventListener("click", (event) => {
+            console.log(event.target.className);
+            if (event.target.className === "card-dob") {
+                const btn = document.getElementsByClassName("card-btn");
+                btn.style.display = "block";
+                const dob = document.getElementsByClassName("card-dob");
+                btn.style.display = "none";
             }
         });
     };
@@ -137,6 +147,7 @@ const Controller = ((model, view) => {
     const bootstrap = () => {
         init();
         showdob();
+        hidedob();
         reload();
     };
 
