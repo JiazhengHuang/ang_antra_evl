@@ -26,8 +26,9 @@ body {
 }
 
 .main-container {
-    width: 100%;
+    max-width: 1100px;
     height: 100%;
+    margin: auto;
     background-color: white;
 
     display: flex;
@@ -38,9 +39,9 @@ body {
 }
 
 .card-container {
-    flex: 50%;
+    flex: 1 1 50%;
     height: var(--height-cards);
-    border: 1px solid;
+    border: 1px solid var(--color-purple);
     border-radius: 10px;
     padding: 10px;
     margin: 5px;
@@ -58,6 +59,14 @@ body {
     width: 90px;
     height: 90px;
     border: 1px solid var(--color-purple);
+    border-radius: 10px;
+    box-shadow: 2px 2px 3px 0px var(--color-purple);
+    overflow: hidden;
+}
+
+.card-img img {
+    width: 100%;
+    height: 100%;
 }
 
 .card-info {
@@ -71,4 +80,13 @@ body {
 
 .card-info button {
     width: 100px;
+}
+
+.reload-btn {
+    position: fixed;
+    height: 100px;
+    width: 100px;
+    border-radius: 50px;
+    bottom: 50px;
+    right: 1px;
 }

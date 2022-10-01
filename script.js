@@ -1,15 +1,13 @@
 // * ~~~~~~~~~~~~~~~~~~~ Api ~~~~~~~~~~~~~~~~~~~
 const Api = (() => {
     // const baseUrl = "https://randomuser.me/api";
-    const baseUrl = "https://randomuser.me";
-    const path = "api";
+    const baseUrl = "https://randomuser.me/api/?results=20";
     // const urlList = [];
     // for (let i = 0; i < 4; i++) {
     //     urlList.push(baseUrl);
     // }
 
-    const getCards = () =>
-        fetch([baseUrl, path].join("/")).then((response) => response.json());
+    const getCards = () => fetch(baseUrl).then((response) => response.json());
 
     return {
         getCards,
@@ -21,11 +19,8 @@ const View = (() => {
     const domstr = {
         container: ".container",
         mainContainer: ".main-container",
-        cardContainer: ".card-container",
-        cardinfo: ".card-info",
-        cardContent: ".card-content",
-        cardbtn: ".card-btn",
-        reloadbtn: ".reload-btn",
+        btncontainer: ".btncontainer",
+        cardBtn: ".cardBtn",
     };
 
     const render = (ele, tmp) => {
@@ -34,20 +29,22 @@ const View = (() => {
 
     const creatTmp = (arr) => {
         let tmp = "";
-        console.log(arr[0].results[0]);
+        console.log(arr);
         arr.forEach((person) => {
             tmp += `
             <div class="card-container">
                 <div class="card-content">
                     <div class="card-img">
-                        <img src="${person.results[0].picture.medium}" />
+                        <img src="${person.picture.large}" />
                     </div>
                     <div class="card-info">
-                        <p class="card-name">name: ${person.results[0].name.first} ${person.results[0].name.last}</p>
-                        <p class="card-email">email: ${person.results[0].email}</p>
-                        <p class="card-phone">phone: ${person.results[0].phone}</p>
-                        <button class="card-btn">Show DOB</button>
-                        <p class="card-dob" style='display:none;'>Birthday: ${person.results[0].dob.date}</p>
+                        <div class="card-name">name: ${person.name.first} ${person.name.last}</div>
+                        <div class="card-email">email: ${person.email}</div>
+                        <div class="card-phone">phone: ${person.phone}</div>
+                        <div class="btncontainer">
+                            <button id="cardBtn-${person.id}" class="cardBtn">Show DOB</button>
+                        </div>
+                        <div class="card-dob" id="card-dob-${person.id}" style='display:none;'>Birthday: ${person.dob.date}</div>
                     </div>
                 </div>
             </div>`;
@@ -65,6 +62,18 @@ const View = (() => {
 
 // * ~~~~~~~~~~~~~~~~~~~ Model ~~~~~~~~~~~~~~~~~~~
 const Model = ((api, view) => {
+    const generateRandomId = () => {
+        const resouse =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
+        const length = 12;
+        let id = "";
+        for (let i = 0; i <= length; i++) {
+            const index = Math.floor(Math.random() * resouse.length);
+            id += resouse[index];
+        }
+        return id;
+    };
+
     const { getCards } = api;
 
     class State {
@@ -76,10 +85,15 @@ const Model = ((api, view) => {
 
         set personlist(newpersonlist) {
             this.#personlist = newpersonlist;
+            this.#personlist.map((x) => {
+                x.id = generateRandomId();
+            });
 
             const mainContainer = document.querySelector(
                 view.domstr.mainContainer
             );
+
+            console.log(newpersonlist);
 
             const tmp = view.creatTmp(newpersonlist);
             view.render(mainContainer, tmp);
@@ -95,38 +109,14 @@ const Model = ((api, view) => {
 // * ~~~~~~~~~~~~~~~~~~~ Controller ~~~~~~~~~~~~~~~~~~~
 const Controller = ((model, view) => {
     const state = new model.State();
+    const container = document.querySelector(view.domstr.container);
+    const mainContainer = document.querySelector(view.domstr.mainContainer);
 
-    const showdob = () => {
-        const cardinfo = document.querySelector(view.domstr.cardinfo);
-
-        cardinfo.addEventListener("click", (event) => {
-            console.log(event.target.className);
-            if (event.target.className === "card-btn") {
-                const btn = document.getElementsByClassName("card-btn");
-                btn.style.display = "none";
-                const dob = document.getElementsByClassName("card-dob");
-                btn.style.display = "block";
-            }
-        });
-    };
-
-    const hidedob = () => {
-        const cardinfo = document.querySelector(view.domstr.cardinfo);
-
-        cardinfo.addEventListener("click", (event) => {
-            console.log(event.target.className);
-            if (event.target.className === "card-dob") {
-                const btn = document.getElementsByClassName("card-btn");
-                btn.style.display = "block";
-                const dob = document.getElementsByClassName("card-dob");
-                btn.style.display = "none";
-            }
-        });
+    const init = () => {
+        model.getCards().then((x) => (state.personlist = x.results));
     };
 
     const reload = () => {
-        const container = document.querySelector(view.domstr.container);
-
         container.addEventListener("click", (event) => {
             if (event.target.className === "reload-btn") {
                 init();
@@ -134,21 +124,39 @@ const Controller = ((model, view) => {
         });
     };
 
-    const init = async () => {
-        const persons = [];
+    const showdob = () => {
+        mainContainer.addEventListener("click", (event) => {
+            if (event.target.className === "cardBtn") {
+                const btnId = event.target.id;
+                const btn = document.getElementById(btnId);
+                btn.style.display = "none";
 
-        for (let i = 0; i < 4; i++) {
-            persons.push(await model.getCards());
-        }
+                const infoId = "card-dob-" + btnId.substring(8);
+                const info = document.getElementById(infoId);
+                info.style.display = "block";
+            }
+        });
+    };
 
-        state.personlist = persons;
+    const hidedob = () => {
+        mainContainer.addEventListener("click", (event) => {
+            if (event.target.className === "card-dob") {
+                const infoId = event.target.id;
+                const info = document.getElementById(infoId);
+                info.style.display = "none";
+
+                const btnId = "cardBtn-" + infoId.substring(9);
+                const btn = document.getElementById(btnId);
+                btn.style.display = "block";
+            }
+        });
     };
 
     const bootstrap = () => {
         init();
+        reload();
         showdob();
         hidedob();
-        reload();
     };
 
     return { bootstrap };
